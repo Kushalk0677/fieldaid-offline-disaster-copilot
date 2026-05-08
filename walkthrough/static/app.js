@@ -1042,7 +1042,6 @@ const WT = {
 
     this.started = true;
     this.current = -1;
-    document.body.classList.add("walkthrough-active");
     this.els.start.classList.add("hidden");
     this.els.nav.classList.remove("hidden");
     this.els.end.classList.remove("hidden");
@@ -1052,7 +1051,6 @@ const WT = {
   end() {
     this.started = false;
     this.current = -1;
-    document.body.classList.remove("walkthrough-active");
     this.els.start.classList.remove("hidden");
     this.els.nav.classList.add("hidden");
     this.els.end.classList.add("hidden");

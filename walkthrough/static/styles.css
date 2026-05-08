@@ -1088,21 +1088,99 @@ ul {
 
 /* Walkthrough */
 
-.walkthrough-start-btn {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  padding: 14px 22px;
-  background: #183c2b;
+.wt-start {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
   color: #fff;
-  border-radius: 10px;
-  font-weight: 800;
-  font-size: 14px;
-  text-decoration: none;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  z-index: 100;
-  animation: walkthrough-pulse 2s infinite;
-  transition: background 0.3s, transform 0.15s;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.wt-start:hover {
+  transform: translateY(-1px);
+}
+
+.wt-start.hidden {
+  display: none;
+}
+
+.wt-end-btn {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #dc2626;
+  background: transparent;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.wt-end-btn:hover {
+  background: #fef2f2;
+}
+
+.wt-end-btn.hidden {
+  display: none;
+}
+
+.wt-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.wt-nav.hidden {
+  display: none;
+}
+
+.wt-counter {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.wt-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--bg-primary);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.wt-arrow:hover:not(:disabled) {
+  background: var(--bg-primary-hover, #1d4ed8);
+}
+
+.wt-arrow:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.wt-arrow.done {
+  background: #10b981;
+}
+
+.wt-arrow.loading {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+body.walkthrough-active .status-strip {
+  flex-wrap: nowrap;
 }
 
 .walkthrough-start-btn:hover {
