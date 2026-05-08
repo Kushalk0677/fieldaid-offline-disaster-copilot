@@ -6,17 +6,9 @@ The project targets the **Global Resilience** track, with strong overlap in **Sa
 
 ## What FieldAid Does
 
-FieldAid helps responders during the first chaotic hours of a flood, fire, storm, earthquake, or blackout:
+FieldAid helps responders during the first chaotic hours of a flood, fire, storm, earthquake, or blackout. A responder can enter a shelter note, upload a damage image, or scan a short video, and the app turns that evidence into a prioritized incident packet. The packet includes extracted facts, inferred recommendations, supply needs, SMS/radio text, Discord handoff drafts, citations from bundled guidance, and human-verification flags.
 
-- analyzes shelter notes and damage reports with local Gemma 4
-- retrieves cited guidance from bundled offline emergency docs
-- creates structured incident reports, supply requests, and SMS/radio updates
-- scans uploaded videos by sampling frames locally
-- uses a local MEDIC disaster-image classifier for photos and video frames
-- optionally uses YOLO as a supporting object detector
-- stores incidents, outbox handoffs, and sync queue records in SQLite
-- exports local records for later upload after connectivity returns
-- never declares a road, bridge, route, or structure safe from imagery
+The project is local-first by design. Gemma 4 runs through Ollama, emergency guidance is retrieved from local Markdown files, incidents are stored in SQLite, uploaded media stays on disk, and sync/export happens later when connectivity returns. The app also includes a small local disaster-image classifier trained from QCRI/MEDIC-derived data so photo and video evidence can still be triaged when cloud vision models are unavailable.
 
 ## Main Demo Story
 
@@ -70,32 +62,140 @@ Each major folder has its own `README.md`.
 
 ## Requirements
 
-### Core App
+For the normal webapp, use Python 3.11 or newer, install the packages in `requirements.txt`, and install Ollama so Gemma 4 can run locally. The included MEDIC classifier checkpoint is already in the repository at `models/fieldaid-medic-image-classifier-final/best.pt`, so no separate download is needed for the lightweight image classifier.
 
-- Python 3.11+ recommended
-- Ollama installed locally for Gemma 4 inference
-- A Gemma 4 model available in Ollama, usually `gemma4:e4b`
-- Python packages from `requirements.txt`
+Video scanning uses OpenCV for frame sampling. YOLO support is optional; if Ultralytics or the YOLO weights are unavailable, FieldAid still samples frames, runs the local classifier when possible, and creates a manual-review incident. Training or reproducing the models is best done on Linux, WSL, Kaggle, or a GPU server. The lightweight classifier can run on older GPUs, while Gemma 4 vision LoRA experiments are much more demanding and may not fit on a 12 GB P100.
 
-### Optional But Useful
+## Model Download And Setup
 
-- `ultralytics` for YOLO support
-- `opencv-python` for video frame sampling
-- local MEDIC classifier checkpoint already included at:
+FieldAid can run in three model layers. The main reasoning layer is Gemma 4 through Ollama. The disaster-image evidence layer is the included MEDIC-trained MobileNetV3 classifier. The optional object-detection layer is YOLO, which helps identify people, vehicles, and other access-related objects in sampled video frames.
+
+### 1. Download Gemma 4 With Ollama
+
+Install Ollama:
+
+```text
+https://ollama.com
+```
+
+Pull the default local model used by the app:
+
+```powershell
+ollama pull gemma4:e4b
+```
+
+Optional stronger workstation model:
+
+```powershell
+ollama pull gemma4:26b
+```
+
+Check that Ollama sees the model:
+
+```powershell
+ollama list
+```
+
+Quick smoke test:
+
+```powershell
+ollama run gemma4:e4b "Summarize this shelter note: 43 people, insulin patients, low water, blocked road."
+```
+
+FieldAid model selector values:
+
+```text
+gemma4:e4b
+gemma4:26b
+fieldaid-gemma4:e4b
+```
+
+`fieldaid-gemma4:e4b` is optional. Use it only if you train/export a FieldAid adapter or create a local Ollama model from `training/Modelfile.fieldaid-gemma4-e4b`.
+
+### 2. Verify The Included MEDIC Classifier
+
+The public repo includes the small final checkpoint:
 
 ```text
 models/fieldaid-medic-image-classifier-final/best.pt
 ```
 
-### Training / Replication
+The checkpoint is about **6.2 MB** and is intentionally small enough to ship with the repository. It was trained as a MobileNetV3 Small classifier on a 25% QCRI/MEDIC-derived FieldAid subset with four operational labels: `building_damage`, `fire`, `flood`, and `road_damage`. The prepared subset contained 17,799 labeled rows before balancing, with label counts of 11,392 building-damage images, 5,022 flood images, 839 road-damage images, and 546 fire images. The final balanced training run used 6,279 training samples and 1,106 validation samples for 8 epochs. The best validation accuracy was **63.56%**, reached at epoch 2, and that best checkpoint is the one included here.
 
-Training is best done on Linux/WSL/Kaggle/a GPU server. The lightweight image classifier can run on older GPUs. Gemma 4 vision LoRA training is much more demanding and may not fit on a 12 GB P100.
+Verify that it exists:
 
-Training dependencies are in:
+```powershell
+Test-Path models\fieldaid-medic-image-classifier-final\best.pt
+```
+
+Run a prediction on any local image:
+
+```powershell
+python -m training.predict_medic_image_classifier `
+  data\web_samples\flood_damage_to_road.jpg `
+  --checkpoint models\fieldaid-medic-image-classifier-final\best.pt
+```
+
+Expected output is JSON with labels such as:
+
+```json
+{
+  "predictions": [
+    {"label": "flood", "confidence": 0.70},
+    {"label": "building_damage", "confidence": 0.22}
+  ]
+}
+```
+
+This classifier is used automatically by:
+
+- Trust photo uploads
+- Video sampled-frame aggregation
+
+### 3. Download YOLO Support Model
+
+YOLO is optional. FieldAid uses it for supporting object detections, not primary disaster classification.
+
+The repo may already include:
 
 ```text
-requirements-train.txt
+yolo11n.pt
 ```
+
+The included `yolo11n.pt` file is about **5.6 MB**. It is not trained specifically for disaster classes; FieldAid uses it only to add supporting observations such as people, vehicles, or traffic objects appearing in sampled frames. The disaster label itself should come from Gemma frame analysis, the local MEDIC classifier, and human review.
+
+If it is missing, install Ultralytics and let it download the model:
+
+```powershell
+python -m pip install ultralytics
+python -c "from ultralytics import YOLO; YOLO('yolo11n.pt')"
+```
+
+Optional custom disaster detector:
+
+```text
+models/disaster_yolo.pt
+```
+
+If you train custom YOLO weights, place them there. FieldAid will prefer `models/disaster_yolo.pt` over `yolo11n.pt`.
+
+### 4. Optional Hugging Face Download For Gemma Weights
+
+You do not need raw Hugging Face Gemma weights to run the webapp through Ollama. Use this only for training experiments or non-Ollama inference.
+
+Login first if the model requires access approval:
+
+```bash
+hf auth login
+```
+
+Example local download:
+
+```bash
+hf download google/gemma-4-E4B-it --local-dir models/gemma-4-E4B-it
+```
+
+Raw Gemma weights are large and should not be committed to this repository.
 
 ## Quick Start: Run The Webapp
 
@@ -137,22 +237,10 @@ python -m pip install fastapi "uvicorn[standard]" python-multipart httpx pydanti
 
 ### 4. Install Ollama And Pull Gemma 4
 
-Install Ollama from:
-
-```text
-https://ollama.com
-```
-
-Pull the default model:
+Follow the commands in **Model Download And Setup** above. The minimum recommended command is:
 
 ```powershell
 ollama pull gemma4:e4b
-```
-
-Optional workstation-quality model:
-
-```powershell
-ollama pull gemma4:26b
 ```
 
 FieldAid remains usable without Ollama by falling back to deterministic local safety outputs, but the strongest demo uses local Gemma.
@@ -379,34 +467,23 @@ Features:
 
 ### Gemma 4 Through Ollama
 
-Default runtime model:
+Gemma 4 is the primary reasoning model in FieldAid. The default runtime is `gemma4:e4b`, which is the best target for a local-first demo. If the machine has more memory and compute, `gemma4:26b` can be selected in the UI for stronger reasoning. FieldAid can also expose `fieldaid-gemma4:e4b` as a selector option if you later train/export a FieldAid-specific adapter and import it into Ollama.
+
+The app calls Gemma during shelter intake, damage assessment, photo grounding, and video frame analysis. If Gemma is unavailable, FieldAid falls back to cautious local logic so the demo remains usable, but the strongest hackathon story uses local Gemma through Ollama.
+
+Supported selector names:
 
 ```text
 gemma4:e4b
-```
-
-Optional stronger mode:
-
-```text
 gemma4:26b
-```
-
-Optional fine-tuned/imported local model name:
-
-```text
 fieldaid-gemma4:e4b
 ```
 
-The app calls Gemma in:
-
-- shelter intake
-- damage assessment
-- photo grounding
-- video frame analysis
-
-If Gemma is unavailable, FieldAid falls back to safe local deterministic behavior.
+Download commands are in [Model Download And Setup](#model-download-and-setup).
 
 ### MEDIC Disaster Image Classifier
+
+The included MEDIC classifier is the project's practical domain-adaptation layer. Instead of trying to fine-tune the full Gemma 4 vision model on a 12 GB P100, we trained a lightweight disaster-image classifier that can run locally and provide evidence to Gemma and the safety layer. It is used for Trust photo uploads and for aggregating labels across sampled video frames.
 
 Included checkpoint:
 
@@ -414,47 +491,35 @@ Included checkpoint:
 models/fieldaid-medic-image-classifier-final/best.pt
 ```
 
-Classes:
+The checkpoint is a MobileNetV3 Small model with four classes: `building_damage`, `fire`, `flood`, and `road_damage`. It is about **6.2 MB**. It was trained on a 25% QCRI/MEDIC-derived FieldAid subset, balanced for training, with 6,279 training samples and 1,106 validation samples. The run lasted 8 epochs, and the best checkpoint came from epoch 2 with **63.56% validation accuracy**. The model is intentionally treated as supporting evidence only; it never replaces human verification.
 
-- `building_damage`
-- `fire`
-- `flood`
-- `road_damage`
-
-Model:
+Model summary:
 
 ```text
 mobilenet_v3_small
+classes: building_damage, fire, flood, road_damage
+best validation accuracy: 0.6356
 ```
 
-Validation accuracy from the included training run:
-
-```text
-~63.6%
-```
-
-This classifier is used for:
-
-- Trust page photo uploads
-- Video page sampled frame aggregation
-
-It is supporting evidence only and never replaces human verification.
+To reproduce this checkpoint from QCRI/MEDIC, follow [Replicate The MEDIC Classifier Training](#replicate-the-medic-classifier-training).
 
 ### YOLO
 
-FieldAid looks for custom disaster YOLO weights at:
+YOLO is optional and supporting. FieldAid first looks for custom disaster YOLO weights at `models/disaster_yolo.pt`. If that file is absent, it tries `yolo11n.pt`. The included `yolo11n.pt` is about **5.6 MB** and is used for generic object context, such as people or vehicles near a route. It is not the main disaster classifier.
+
+Model lookup order:
 
 ```text
 models/disaster_yolo.pt
-```
-
-If absent, it tries:
-
-```text
 yolo11n.pt
 ```
 
-YOLO is used only as a supporting object detector for people, vehicles, traffic signs, and access-related context. It is not the main disaster classifier.
+If `yolo11n.pt` is missing, recreate it with:
+
+```powershell
+python -m pip install ultralytics
+python -c "from ultralytics import YOLO; YOLO('yolo11n.pt')"
+```
 
 ## Replicate The MEDIC Classifier Training
 
