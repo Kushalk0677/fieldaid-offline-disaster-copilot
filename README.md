@@ -1,8 +1,12 @@
 # FieldAid: Offline Disaster Response Copilot
 
-FieldAid is a Gemma 4 hackathon project: an offline-first disaster response copilot that turns shelter notes, photos, and videos into cited action plans, incident packets, SMS/radio updates, Discord handoff drafts, and sync-later exports when the network is down.
+The school has 43 people inside. That includes six residents over 75 and two who need insulin kept below 8 degrees. The water supply will last eight hours at current draw. The bridge to the main road collapsed an hour ago. Radios are picking up partial information from three other shelters in the district. No one has a clear picture of what is happening.
 
-The project targets the **Global Resilience** track, with strong overlap in **Safety & Trust** and the **Ollama** special technology track.
+Existing AI assistants cannot help here. GPT-4, Claude, Gemini Pro all require internet. The network is down.
+
+FieldAid runs on a single laptop with zero connectivity. It takes what responders actually have in the first hours, fragmented notes, offline photos, short field video clips, and turns that into a prioritized incident packet: action plan, supply request, SMS update, grounded citations, and verification flags. The reasoning engine is Gemma 4 E4B running locally through Ollama.
+
+FieldAid is a Gemma 4 hackathon project targeting the **Global Resilience** track, with strong overlap in **Safety and Trust** and the **Ollama** special technology track.
 
 ## What FieldAid Does
 

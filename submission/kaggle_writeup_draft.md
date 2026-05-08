@@ -8,7 +8,7 @@ Global Resilience (primary). Secondary: Safety and Trust, Ollama special technol
 
 ---
 
-We built FieldAid after seeing a pattern across disaster reports: the hardest decisions always happen in the first few hours, exactly when connectivity goes down. Shelter coordinators with a notebook and a radio. EMTs with photos on a phone that cannot load Copilot or Gemini. Teams triaging by instinct because the tools that could help them require a network that no longer exists. The disconnect was clear. AI models capable of reasoning over field reports and analyzing images were sitting idle in disaster zones, not because they were too weak, but because they were all cloud-only. Gemma 4 changed that constraint. At 9.6 GB, the E4B variant runs locally on a laptop through Ollama. That made it possible to put frontier-level reasoning into the same machine responders already carry.
+We built FieldAid after seeing a pattern across disaster reports: the hardest decisions always happen in the first few hours, exactly when connectivity goes down. Shelter coordinators with a notebook and a radio. EMTs with photos on a phone that cannot load Copilot or Gemini. Teams triaging by instinct because the tools that could help them require a network that no longer exists. Every existing AI assistant in disaster response is cloud-bound. The disconnect was clear. We chose Gemma 4 because it was the only open model that delivered frontier multimodal reasoning while running entirely on a laptop. The E4B variant weighs 9.6 GB, handles text and image input in a single pass, supports structured JSON output through native system prompt support, and runs through Ollama with zero cloud dependency. Cloud APIs like GPT-4 or Claude are not an option when cell towers are down. Smaller open models lack the reasoning depth needed for triage priority ordering and supply chain logic. Gemma 4 sits in the missing middle.
 
 The school building has 43 people inside. That includes six residents over 75 and two who need insulin kept below 8 degrees. The water supply will last eight hours at current draw. The bridge to the main road collapsed an hour ago. Radios crackle with partial information from three other shelters in the district. No one has a clear picture of what is happening.
 
@@ -33,7 +33,11 @@ The backend is a FastAPI service with 13 endpoints. The core endpoints are:
 
 The database is SQLite in WAL mode with three tables holding incidents, outbound message drafts, and the sync queue. Incidents auto-generate sync queue entries on creation and move to exported status after a sync export.
 
-Gemini 4 runs locally through Ollama at `http://127.0.0.1:11434/api/chat` with temperature 0.1 for deterministic output. The default model is `gemma4:e4b` (9.6 GB). Workstation demos can swap to `gemma4:26b` for stronger reasoning. The system prompt is fixed: it tells the model to return only valid JSON, never claim to replace emergency services, and always flag medical, structural, and life-safety recommendations for human verification.
+Gemma 4 is the core reasoning engine. It runs locally through Ollama at `http://127.0.0.1:11434/api/chat` at temperature 0.1 for deterministic structured output. The default model is `gemma4:e4b` (9.6 GB, 128K context, multimodal). Workstation demos can swap to `gemma4:26b` (18 GB, 256K context, MoE architecture with 4B active parameters) for deeper reasoning on complex multi-constraint scenarios.
+
+Gemma 4 was the only open model that met three requirements simultaneously. First, it must reason over field reports to produce prioritized action plans with correct medical and supply logic. Second, it must process images alongside text in a single forward pass so a photo of a damaged bridge can be analyzed in the same prompt as responder notes. Third, it must run on a laptop offline. GPT-4 and Claude fail on the third requirement. Smaller open models like Llama 3.1 8B or Mistral 7B fail on the first two. Gemma 4 E4B satisfies all three. Its native system prompt support, built-in multimodal encoder, and structured JSON reliability make it the right fit for a tool where incorrect reasoning has real consequences.
+
+The system prompt is fixed: it tells the model to return only valid JSON, never claim to replace emergency services, and always flag medical, structural, and life-safety recommendations for human verification.
 
 ---
 
@@ -77,7 +81,7 @@ The model peaked at 63.56 percent validation accuracy at epoch 2. By epoch 8, tr
 
 Confidence bands are set at 70 percent for likely, 45 percent for possible, and below 45 percent for uncertain. These thresholds are generous on purpose: a 55 percent confidence prediction that an image shows flood damage should still trigger the right response workflow.
 
-The classifier serves as a visual evidence stream alongside Gemma 4: it runs first on every trust photo upload and every sampled video frame, its output is injected into the Gemma 4 prompt, and for video it aggregates results across frames with the formula `min(0.95, avg_confidence * 0.7 + frame_ratio * 0.3)`. If Gemma 4 returns unknown or lower confidence than the classifier aggregation, the classifier wins.
+The classifier serves as a supporting visual signal alongside Gemma 4, not an authoritative label. It runs first on every trust photo upload and every sampled video frame, and its top predictions (for example, "flood 70 percent, building damage 22 percent") are injected into the Gemma 4 prompt as one piece of evidence among many. Gemma 4 reasons over that evidence alongside the responder note, retrieved guidance, and the raw image itself. If the classifier is uncertain or Gemma 4 returns higher confidence from multimodal analysis, Gemma 4 wins.
 
 We also maintain LoRA fine-tuning scripts for Gemma 4 text and vision adapters using Unsloth. The text adapter configures r=16, alpha=32, dropout=0, learning rate 2e-4, 3 epochs, effective batch size 8, and targets all attention and MLP projection layers. The vision adapter uses r=4, alpha=8, 2 epochs, and selective freezing options for 12 GB GPUs. Both are ready to run on a single A100 or T4 instance and export to GGUF via the Ollama Modelfile for local deployment.
 
@@ -97,19 +101,17 @@ The SMS layer localizes updates to Hindi, Tamil, and Spanish in addition to Engl
 
 ### Evaluation
 
-FieldAid runs 34 tests across five files: 12 API endpoint tests, 8 core logic tests, 1 image classifier test, 6 training asset tests, and 7 video scan tests. All pass in CI on Python 3.11.
+FieldAid runs 34 tests across five files: 12 API endpoint tests, 8 core logic tests, 1 image classifier test, 6 training asset tests, and 7 video scan tests. All pass in CI on Python 3.11 via GitHub Actions.
 
-The image classifier achieved 63.56 percent validation accuracy on 1,106 balanced samples. Combined with the OpenCV heuristic fallback (fire detection confidence capped at 0.82, smoke at 0.72), the visual pipeline covers the four disaster types and two atmospheric hazards.
+The MobileNetV3 classifier scores 63.56 percent validation accuracy on 1,106 balanced samples. We report this number transparently, but it is important to understand what the classifier actually does in the system. It is not the decision-maker. It provides a fast, local visual signal that Gemma 4 reasons over. The 6.2 MB model runs on CPU under 100 milliseconds per image, which means it can process 20 sampled video frames in under two seconds while the system waits for Gemma 4. When the classifier says fire at 70 percent confidence, Gemma 4 receives that as context, looks at the image directly, checks the responder notes, and decides. When the classifier is uncertain, Gemma 4 still has the raw image and the OpenCV heuristic fallback (HSV orange detection for fire, low-saturation gray detection for smoke) to form its own judgment. The classifier fills a functional role: fast, offline, local visual evidence. It does not replace Gemma 4 reasoning.
 
-The deterministic fallback analysis correctly identifies population counts with the regex `\d+\s*(people|persons|residents|evacuees)`, water hours with `water.*\d+\s*(hour|hr|hrs|hours)`, and insurance mentions. It assigns urgency through a three-tier escalation: medium by default, high on any of 12 common keywords, critical on unconscious, life threat, severe bleeding, or fire spreading.
-
-Every path in the system produces verification flags, tool traces, and structured JSON output. Nothing silently returns a safe declaration.
+The deterministic fallback analysis correctly identifies population counts with the regex `\d+\s*(people|persons|residents|evacuees)`, water hours with `water.*\d+\s*(hour|hr|hrs|hours)`, and insulin mentions. It assigns urgency through a three-tier escalation: medium by default, high on any of 12 common keywords, critical on unconscious, life threat, severe bleeding, or fire spreading. This fallback exists only to keep the system operational if Ollama is unreachable.
 
 ---
 
 ### Limitations and What Comes Next
 
-The classifier accuracy of 63.56 percent reflects the challenge of classifying real disaster imagery under heavy class imbalance. More balanced training data and a larger model (EfficientNet-B0 or the 59-class variant currently in training) will close that gap. The current checkpoint is intentionally small enough to run on a CPU.
+The MobileNetV3 classifier was chosen for speed, not accuracy. It provides a fast visual signal that Gemma 4 reasons over. A larger model like EfficientNet-B0 or a 59-class variant would improve standalone accuracy, but the 6.2 MB checkpoint runs on CPU in under 100 milliseconds, which is the constraint that matters for edge deployment.
 
 Gemma 4 E4B is the right size for edge deployment but occasionally produces verbose summaries. The 26B variant improves reasoning quality and is available on workstations with more memory.
 
