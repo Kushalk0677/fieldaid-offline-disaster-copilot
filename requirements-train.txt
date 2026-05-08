@@ -1,0 +1,16 @@
+unsloth==2026.5.2
+unsloth_zoo>=2026.5.1
+transformers==5.5.0
+trl==0.24.0
+datasets==4.3.0
+accelerate>=1.6.0
+peft>=0.15.0
+bitsandbytes>=0.45.0
+huggingface-hub>=1.5.0,<2.0
+diffusers
+hf_transfer
+nest-asyncio
+pydantic
+tyro
+xformers>=0.0.27.post2
+pillow>=10.0.0

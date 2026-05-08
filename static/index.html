@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FieldAid</title>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand-block">
+        <div class="brand-mark" aria-hidden="true">F</div>
+        <div>
+          <h1>FieldAid</h1>
+          <p>Offline disaster response copilot for shelters, routes, and incident logs.</p>
+        </div>
+      </div>
+      <div class="status-strip" aria-label="System status">
+        <div class="status-card">
+          <span>Engine</span>
+          <strong id="engineStatus">Local-first</strong>
+        </div>
+        <div class="status-card">
+          <span>Incidents</span>
+          <strong id="incidentCount">0</strong>
+        </div>
+        <div class="status-card">
+          <span>High priority</span>
+          <strong id="highCount">0</strong>
+        </div>
+      </div>
+    </header>
+
+    <nav class="app-nav" aria-label="FieldAid pages">
+      <a href="#mission" data-page-link="mission">Mission</a>
+      <a href="#intake" data-page-link="intake">Intake</a>
+      <a href="#dashboard" data-page-link="dashboard">Dashboard</a>
+      <a href="#incidents" data-page-link="incidents">Incidents</a>
+      <a href="#video" data-page-link="video">Video</a>
+      <a href="#trust" data-page-link="trust">Trust</a>
+      <a href="#offline" data-page-link="offline">Offline Proof</a>
+      <a href="#exports" data-page-link="exports">Exports</a>
+    </nav>
+
+    <main>
+      <section class="app-page" id="page-mission" data-page="mission">
+        <section class="mission-hero">
+          <div>
+            <span class="scenario-label">3-minute demo path</span>
+            <h2>Mission Mode: Network Down, Response Still Moving</h2>
+            <p>Run one complete crisis story: shelter triage, video evidence, Gemma tool reasoning, trust verification, Discord/radio handoff, and offline export.</p>
+          </div>
+          <button class="primary" id="startMission" type="button">Start Guided Mission</button>
+        </section>
+        <section class="mission-grid">
+          <article class="mission-step" data-mission-step="1">
+            <strong>1</strong>
+            <h3>Shelter Intake</h3>
+            <p>Load the flooded school note with insulin patients, low water, and blocked access.</p>
+            <button class="secondary" type="button" data-mission-action="intake">Open Intake</button>
+          </article>
+          <article class="mission-step" data-mission-step="2">
+            <strong>2</strong>
+            <h3>Video Evidence</h3>
+            <p>Upload a fire, flood, road, or building clip. FieldAid samples frames and aggregates local classifier evidence.</p>
+            <button class="secondary" type="button" data-mission-action="video">Open Video</button>
+          </article>
+          <article class="mission-step" data-mission-step="3">
+            <strong>3</strong>
+            <h3>Gemma Tools</h3>
+            <p>Show retrieval, incident creation, supply request, handoff drafting, and verification flags.</p>
+            <button class="secondary" type="button" data-mission-action="dashboard">Open Dashboard</button>
+          </article>
+          <article class="mission-step" data-mission-step="4">
+            <strong>4</strong>
+            <h3>Trust Gate</h3>
+            <p>Ask a risky route question and show FieldAid refusing unsupported safety claims.</p>
+            <button class="secondary" type="button" data-mission-action="trust">Open Trust</button>
+          </article>
+          <article class="mission-step" data-mission-step="5">
+            <strong>5</strong>
+            <h3>Handoff & Sync</h3>
+            <p>Copy a Discord/radio draft, download a handoff packet, and export the offline sync queue.</p>
+            <button class="secondary" type="button" data-mission-action="exports">Open Exports</button>
+          </article>
+          <article class="mission-step" data-mission-step="6">
+            <strong>6</strong>
+            <h3>Offline Proof</h3>
+            <p>Show local Gemma, SQLite, local docs, local classifier, and no hosted inference dependency.</p>
+            <button class="secondary" type="button" data-mission-action="offline">Open Proof</button>
+          </article>
+        </section>
+      </section>
+
+      <section class="app-page active" id="page-intake" data-page="intake">
+        <section class="ops-panel" aria-label="Mission controls">
+          <div class="control-grid">
+            <label>
+              Demo scenario
+              <select id="demoScenario">
+                <option value="flooded_school">Flooded school shelter</option>
+                <option value="washed_road">Road washed out</option>
+                <option value="clinic_meds">Clinic medication shortage</option>
+                <option value="evac_route">Evacuation route blocked</option>
+              </select>
+            </label>
+            <label>
+              Responder role
+              <select id="roleSelect">
+                <option value="district operations">District operations</option>
+                <option value="volunteer">Volunteer</option>
+                <option value="shelter coordinator">Shelter coordinator</option>
+              </select>
+            </label>
+            <label>
+              SMS language
+              <select id="languageSelect">
+                <option value="English">English</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Tamil">Tamil</option>
+                <option value="Spanish">Spanish</option>
+              </select>
+            </label>
+          </div>
+          <div class="control-actions">
+            <button class="secondary" id="loadScenario" type="button">Load Scenario</button>
+            <button class="secondary" id="voiceButton" type="button">Radio Dictation</button>
+          </div>
+          <p id="voiceStatus" class="inline-note">Load a demo, select a role/language, or dictate a radio-style field note locally.</p>
+        </section>
+
+        <section class="shell">
+          <section class="workspace">
+            <nav class="tabs" aria-label="Workflows">
+              <button class="tab active" data-tab="shelter">Shelter Intake</button>
+              <button class="tab" data-tab="damage">Damage Assessment</button>
+            </nav>
+
+            <section class="panel active" id="panel-shelter">
+              <div class="panel-heading">
+                <div>
+                  <h2>Shelter Intake</h2>
+                  <p>Convert a shelter note or photo into a dispatch-ready action plan.</p>
+                </div>
+                <span class="scenario-label">Triage</span>
+              </div>
+              <form class="analysis-form" data-scenario="shelter">
+                <div class="form-grid">
+                  <label>
+                    Location
+                    <input name="location" value="Govt School, Ward 7">
+                  </label>
+                  <label>
+                    Gemma model
+                    <select name="model">
+                      <option value="gemma4:e4b">gemma4:e4b</option>
+                      <option value="fieldaid-gemma4:e4b">fieldaid-gemma4:e4b</option>
+                      <option value="gemma4:26b">gemma4:26b</option>
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  Shelter note
+                  <textarea name="note_text" rows="8">Govt School shelter, Ward 7. 43 people. 6 elderly. 2 insulin patients. Water left for 8 hours. Bridge road blocked near market. Need drinking water, medicine cold storage, blankets, and access route update.</textarea>
+                </label>
+                <label class="file-row">
+                  <span>Optional note/photo</span>
+                  <input name="image" type="file" accept="image/*">
+                  <span class="file-hint">JPG, PNG, or phone screenshot</span>
+                </label>
+                <div class="local-preview hidden" data-file-preview></div>
+                <button class="primary" type="submit">Analyze Shelter</button>
+              </form>
+            </section>
+
+            <section class="panel" id="panel-damage">
+              <div class="panel-heading">
+                <div>
+                  <h2>Damage Assessment</h2>
+                  <p>Turn road, bridge, or access-route evidence into response priorities.</p>
+                </div>
+                <span class="scenario-label">Access</span>
+              </div>
+              <form class="analysis-form" data-scenario="damage">
+                <div class="form-grid">
+                  <label>
+                    Location
+                    <input name="location" value="Market bridge access road">
+                  </label>
+                  <label>
+                    Gemma model
+                    <select name="model">
+                      <option value="gemma4:e4b">gemma4:e4b</option>
+                      <option value="fieldaid-gemma4:e4b">fieldaid-gemma4:e4b</option>
+                      <option value="gemma4:26b">gemma4:26b</option>
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  Field note
+                  <textarea name="note_text" rows="8">Photo from volunteer near market bridge. Road appears blocked after flooding. Need route safety assessment and alternate access for water delivery.</textarea>
+                </label>
+                <label class="file-row">
+                  <span>Before image</span>
+                  <input name="before_image" type="file" accept="image/*">
+                  <span class="file-hint">Optional comparison baseline</span>
+                </label>
+                <div class="local-preview hidden" data-file-preview></div>
+                <label class="file-row">
+                  <span>Damage image</span>
+                  <input name="image" type="file" accept="image/*">
+                  <span class="file-hint">Road, bridge, shelter, supply list, or map photo</span>
+                </label>
+                <div class="local-preview hidden" data-file-preview></div>
+                <button class="primary" type="submit">Assess Damage</button>
+              </form>
+            </section>
+          </section>
+
+          <aside class="results" aria-live="polite">
+            <div class="result-header">
+              <div>
+                <h2>Action Board</h2>
+                <p id="resultMeta">Run an analysis to populate the response board.</p>
+              </div>
+              <span class="urgency" id="urgencyBadge">Ready</span>
+            </div>
+            <div id="resultContent" class="empty">
+              <div class="empty-state">
+                <strong>Awaiting field input</strong>
+                <p>Priorities, SMS copy, supplies, citations, and verification flags will appear here.</p>
+              </div>
+            </div>
+          </aside>
+        </section>
+      </section>
+
+      <section class="app-page" id="page-dashboard" data-page="dashboard">
+        <section class="page-heading">
+          <div>
+            <h2>Operations Dashboard</h2>
+            <p>Aggregate urgent needs, route blockers, verification flags, and local sync status.</p>
+          </div>
+          <button class="secondary" id="refreshDashboard" type="button">Refresh</button>
+        </section>
+        <section class="dashboard-band" id="dashboardBand">
+          <div class="dash-card">
+            <span>Medical</span>
+            <strong id="medicalNeedCount">0</strong>
+          </div>
+          <div class="dash-card">
+            <span>Water</span>
+            <strong id="waterNeedCount">0</strong>
+          </div>
+          <div class="dash-card">
+            <span>Blocked Routes</span>
+            <strong id="blockedRouteCount">0</strong>
+          </div>
+          <div class="dash-card">
+            <span>Verification</span>
+            <strong id="verificationFlagCount">0</strong>
+          </div>
+        </section>
+        <section class="route-board">
+          <div class="panel-heading">
+            <div>
+              <h2>Offline Route Board</h2>
+              <p>Local schematic of blocked-route incidents for handoff and dispatch planning.</p>
+            </div>
+            <span class="scenario-label">Map</span>
+          </div>
+          <div id="routeBoard" class="route-grid"></div>
+        </section>
+      </section>
+
+      <section class="app-page" id="page-incidents" data-page="incidents">
+        <section class="panel active" id="panel-log">
+          <div class="panel-heading">
+            <div>
+              <h2>Incident Log</h2>
+              <p>Local records saved in SQLite for later sync, status updates, or handoff.</p>
+            </div>
+            <button class="secondary" id="refreshLog">Refresh</button>
+          </div>
+          <div class="incident-list" id="incidentList"></div>
+        </section>
+      </section>
+
+      <section class="app-page" id="page-video" data-page="video">
+        <section class="page-heading">
+          <div>
+            <h2>Video Scan</h2>
+            <p>Sample frames from an uploaded clip, ask Gemma to identify the disaster, and create an incident from the observations.</p>
+          </div>
+          <span class="scenario-label">YOLO</span>
+        </section>
+        <section class="video-layout">
+          <section class="panel active">
+            <div class="panel-heading">
+              <div>
+                <h2>Upload Clip</h2>
+                <p>Use short MP4/MOV clips for reliable local Gemma frame analysis.</p>
+              </div>
+              <span class="scenario-label">Frames</span>
+            </div>
+            <form id="videoScanForm" class="analysis-form">
+              <div class="form-grid">
+                <label>
+                  Location
+                  <input name="location" value="Creek road washout">
+                </label>
+                <label>
+                  Sample interval
+                  <select name="sample_interval_seconds">
+                    <option value="1">Every 1 second</option>
+                    <option value="2" selected>Every 2 seconds</option>
+                    <option value="5">Every 5 seconds</option>
+                  </select>
+                </label>
+              </div>
+              <label>
+                Gemma model for incident
+                <select name="model">
+                  <option value="gemma4:e4b">gemma4:e4b</option>
+                  <option value="fieldaid-gemma4:e4b">fieldaid-gemma4:e4b</option>
+                  <option value="gemma4:26b">gemma4:26b</option>
+                </select>
+              </label>
+              <label class="file-row">
+                <span>Video file</span>
+                <input name="video" type="file" accept="video/*">
+                <span class="file-hint">MP4, MOV, AVI, MKV, or WEBM</span>
+              </label>
+              <div class="local-preview hidden" id="videoPreview"></div>
+              <button class="primary" type="submit">Run Video Scan</button>
+            </form>
+          </section>
+          <section class="results video-results">
+            <div class="result-header">
+              <div>
+                <h2>Scan Results</h2>
+                <p id="videoScanMeta">Upload a video to sample frames and create an incident.</p>
+              </div>
+              <span class="urgency" id="videoModelSource">Ready</span>
+            </div>
+            <div id="videoScanResults" class="empty">
+              <div class="empty-state">
+                <strong>No video scanned yet</strong>
+              <p>Disaster identification, annotated frames, supporting detections, and created incident details will appear here.</p>
+              </div>
+            </div>
+          </section>
+        </section>
+      </section>
+
+      <section class="app-page" id="page-trust" data-page="trust">
+        <section class="grounding-card">
+          <div class="panel-heading">
+            <div>
+              <h2>Grounding Challenge</h2>
+              <p>Ask a risky field question and verify the answer stays cited and cautious.</p>
+            </div>
+            <span class="scenario-label">Trust</span>
+          </div>
+          <textarea id="groundingQuestion" rows="4">Can we send civilians across this damaged bridge if it looks mostly intact?</textarea>
+          <div class="form-grid">
+            <label>
+              Gemma model
+              <select id="groundingModel">
+                <option value="gemma4:e4b">gemma4:e4b</option>
+                <option value="fieldaid-gemma4:e4b">fieldaid-gemma4:e4b</option>
+                <option value="gemma4:26b">gemma4:26b</option>
+              </select>
+            </label>
+            <label>
+              Discord destination
+              <input id="discordDestination" placeholder="Discord DM/channel URL or numeric user/channel ID">
+            </label>
+            <label class="file-row">
+              <span>Status photo</span>
+              <input id="groundingImage" name="image" type="file" accept="image/*">
+              <span class="file-hint">Optional photo for Gemma scene inspection</span>
+            </label>
+          </div>
+          <p class="inline-note">FieldAid creates a local outbox record, copies the draft, and opens Discord. It never sends the message automatically.</p>
+          <div class="local-preview hidden" id="groundingPreview"></div>
+          <button class="primary" id="groundingButton" type="button">Check Grounding</button>
+          <div id="groundingResult" class="grounding-result"></div>
+        </section>
+      </section>
+
+      <section class="app-page" id="page-offline" data-page="offline">
+        <section class="page-heading">
+          <div>
+            <h2>Offline Proof</h2>
+            <p>Everything needed for the demo runs locally after setup: Gemma through Ollama, SQLite records, bundled guidance, and the MEDIC image classifier.</p>
+          </div>
+          <button class="secondary" id="refreshOfflineProof" type="button">Refresh</button>
+        </section>
+        <section class="offline-grid" id="offlineProofGrid">
+          <article class="proof-card">
+            <span>Gemma Runtime</span>
+            <strong>Ollama local</strong>
+            <p>Configured model path: gemma4:e4b with fieldaid-gemma4:e4b optional adapter route.</p>
+          </article>
+          <article class="proof-card">
+            <span>Visual Model</span>
+            <strong>MEDIC classifier</strong>
+            <p>Local MobileNetV3 model trained on QCRI/MEDIC disaster images.</p>
+          </article>
+          <article class="proof-card">
+            <span>Storage</span>
+            <strong>SQLite + uploads</strong>
+            <p>Incidents, outbox drafts, and sync queue stay on this machine.</p>
+          </article>
+          <article class="proof-card">
+            <span>Grounding</span>
+            <strong>Bundled RAG</strong>
+            <p>Emergency guidance snippets are retrieved from local project files.</p>
+          </article>
+        </section>
+        <section class="trace-library">
+          <h2>Gemma Tool Trace Library</h2>
+          <div class="trace-row">
+            <span>retrieve_guidance</span>
+            <span>create_incident_report</span>
+            <span>create_supply_request</span>
+            <span>generate_sms_update</span>
+            <span>create_discord_handoff</span>
+            <span>export_offline_sync_packet</span>
+          </div>
+        </section>
+      </section>
+
+      <section class="app-page" id="page-exports" data-page="exports">
+        <section class="export-grid">
+          <article class="export-card">
+            <h2>Sync Later Queue</h2>
+            <p>Queued SQLite records for later upload or archive after the network returns.</p>
+            <div class="control-actions">
+              <button class="primary" id="exportSync" type="button">Export Queued Sync</button>
+              <button class="secondary" id="markSyncExported" type="button">Mark Exported</button>
+              <button class="secondary" id="refreshQueues" type="button">Refresh Queues</button>
+            </div>
+            <div id="syncQueueList" class="queue-list"></div>
+          </article>
+          <article class="export-card">
+            <h2>Outbound Handoff Outbox</h2>
+            <p>Discord handoffs are tracked as local drafts with copied/opened/manual-send status.</p>
+            <div id="outboxList" class="queue-list"></div>
+          </article>
+          <article class="export-card">
+            <h2>Handoff Packets</h2>
+            <p>Open the Incident Log and use each report's packet button for printable/plain-text handoff.</p>
+            <a class="link-button" href="#incidents">Go to Incident Log</a>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
