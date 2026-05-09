@@ -1,12 +1,20 @@
 # FieldAid: Offline Disaster Response Copilot
 
-The school has 43 people inside. That includes six residents over 75 and two who need insulin kept below 8 degrees. The water supply will last eight hours at current draw. The bridge to the main road collapsed an hour ago. Radios are picking up partial information from three other shelters in the district. No one has a clear picture of what is happening.
+The school was never meant to become a shelter. But now 43 people are sleeping on classroom floors under emergency lights that may not last the night. Six of them are over 75. Two are children with insulin that has to stay cold, even as the generators struggle and the refrigerators begin to fail.
 
-Existing AI assistants cannot help here. GPT-4, Claude, Gemini Pro all require internet. The network is down.
+Outside, the bridge to the main road collapsed an hour ago.
 
-FieldAid runs on a single laptop with zero connectivity. It takes what responders actually have in the first hours, fragmented notes, offline photos, short field video clips, and turns that into a prioritized incident packet: action plan, supply request, SMS update, grounded citations, and verification flags. The reasoning engine is Gemma 4 E4B running locally through Ollama.
+Parents are trying to keep children calm while volunteers ration the last clean water they have left, maybe eight hours’ worth if everyone is careful. Radios crackle with broken fragments from three other shelters across the district. Someone mentions flooding. Someone else mentions injuries. No one knows what information is real anymore.
 
-FieldAid is a Gemma 4 hackathon project targeting the **Global Resilience** track, with strong overlap in **Safety and Trust** and the **Ollama** special technology track.
+And then the internet disappears completely.
+
+No cloud AI can help now. OpenAI GPT-4, Anthropic Claude, and Google Gemini Pro all depend on connectivity. In the first critical hours of a disaster, that assumption breaks.
+
+FieldAid was built for the moment after the network dies.
+
+Running entirely offline on a single laptop, it takes the reality responders actually face: handwritten notes, damaged photos, shaky field videos, and partial witness reports, then turns them into something usable. It generates prioritized incident packets, actionable response plans, supply requests, SMS-ready updates, grounded citations, and verification flags.
+
+At the center of it is Ollama running Gemma 4 E4B locally, giving responders something they almost never have during disasters: clarity when communication, coordination, and certainty are collapsing around them.
 
 ## What FieldAid Does
 
