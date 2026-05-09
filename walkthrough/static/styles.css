@@ -222,6 +222,12 @@ h3 {
   line-height: 1.4;
 }
 
+.status-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .status-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(102px, 1fr));
