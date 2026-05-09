@@ -228,6 +228,12 @@ h3 {
   gap: 8px;
 }
 
+.status-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .status-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(102px, 1fr));
@@ -1183,133 +1189,4 @@ ul {
 .wt-arrow.loading {
   opacity: 0.6;
   cursor: wait;
-}
-
-body.walkthrough-active .status-strip {
-  flex-wrap: nowrap;
-}
-
-.walkthrough-start-btn:hover {
-  background: #1e4d38;
-  transform: scale(1.05);
-}
-
-.walkthrough-start-btn.hidden {
-  display: none;
-}
-
-.walkthrough-end-btn {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #dc2626;
-  color: #fff;
-  border: none;
-  font-size: 18px;
-  font-weight: 800;
-  cursor: pointer;
-  z-index: 102;
-  transition: background 0.3s;
-}
-
-.walkthrough-end-btn:hover {
-  background: #b91c1c;
-}
-
-.walkthrough-end-btn.hidden {
-  display: none;
-}
-
-.walkthrough-nav-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  padding: 14px 24px;
-  background: #183c2b;
-  color: #fff;
-  z-index: 101;
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.15);
-}
-
-.walkthrough-nav-bar.hidden {
-  display: none;
-}
-
-.walkthrough-counter {
-  font-weight: 700;
-  font-size: 15px;
-  text-align: center;
-  min-width: 180px;
-}
-
-.walkthrough-arrow {
-  min-width: 52px;
-  min-height: 44px;
-  border-radius: 8px;
-  border: none;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.3s, transform 0.15s, color 0.3s;
-  padding: 8px 16px;
-}
-
-.walkthrough-arrow-prev {
-  background: #1e4d38;
-  color: #fff;
-}
-
-.walkthrough-arrow-prev:hover:not(:disabled) {
-  background: #26634a;
-  transform: scale(1.05);
-}
-
-.walkthrough-arrow-prev:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-.walkthrough-arrow-next {
-  background: #22c55e;
-  color: #fff;
-}
-
-.walkthrough-arrow-next:hover:not(:disabled) {
-  background: #16a34a;
-  transform: scale(1.05);
-}
-
-.walkthrough-arrow-next.loading {
-  background: #78716c;
-  cursor: wait;
-}
-
-.walkthrough-arrow-next.done {
-  background: #1e4d38;
-}
-
-.walkthrough-arrow-next:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-body.walkthrough-active .app-nav {
-  display: none !important;
-}
-
-body.walkthrough-active .status-strip {
-  display: none !important;
-}
-
-@keyframes walkthrough-pulse {
-  0%, 100% { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); }
-  50% { box-shadow: 0 4px 24px rgba(24, 60, 43, 0.5); }
 }
