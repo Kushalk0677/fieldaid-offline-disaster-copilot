@@ -222,12 +222,6 @@ h3 {
   line-height: 1.4;
 }
 
-.status-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .status-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(102px, 1fr));
@@ -1094,93 +1088,144 @@ ul {
 
 /* Walkthrough */
 
-.wt-start {
-  padding: 0.35rem 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 600;
+.walkthrough-start-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 14px 22px;
+  background: #183c2b;
   color: #fff;
-  background: linear-gradient(135deg, #10b981, #059669);
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 14px;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  animation: walkthrough-pulse 2s infinite;
+  transition: background 0.3s, transform 0.15s;
+}
+
+.walkthrough-start-btn:hover {
+  background: #1e4d38;
+  transform: scale(1.05);
+}
+
+.walkthrough-start-btn.hidden {
+  display: none;
+}
+
+.walkthrough-end-btn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #dc2626;
+  color: #fff;
   border: none;
-  border-radius: 0.5rem;
+  font-size: 18px;
+  font-weight: 800;
   cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
+  z-index: 102;
+  transition: background 0.3s;
 }
 
-.wt-start:hover {
-  transform: translateY(-1px);
+.walkthrough-end-btn:hover {
+  background: #b91c1c;
 }
 
-.wt-start.hidden {
+.walkthrough-end-btn.hidden {
   display: none;
 }
 
-.wt-end-btn {
-  padding: 0.35rem 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #dc2626;
-  background: transparent;
-  border: 1px solid #fecaca;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.wt-end-btn:hover {
-  background: #fef2f2;
-}
-
-.wt-end-btn.hidden {
-  display: none;
-}
-
-.wt-nav {
+.walkthrough-nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  justify-content: center;
+  gap: 20px;
+  padding: 14px 24px;
+  background: #183c2b;
+  color: #fff;
+  z-index: 101;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.15);
 }
 
-.wt-nav.hidden {
+.walkthrough-nav-bar.hidden {
   display: none;
 }
 
-.wt-counter {
-  padding: 0.35rem 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--text-muted);
-  white-space: nowrap;
+.walkthrough-counter {
+  font-weight: 700;
+  font-size: 15px;
+  text-align: center;
+  min-width: 180px;
 }
 
-.wt-arrow {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.35rem 0.6rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #fff;
-  background: var(--bg-primary);
+.walkthrough-arrow {
+  min-width: 52px;
+  min-height: 44px;
+  border-radius: 8px;
   border: none;
-  border-radius: 0.5rem;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s, opacity 0.15s;
+  transition: background 0.3s, transform 0.15s, color 0.3s;
+  padding: 8px 16px;
 }
 
-.wt-arrow:hover:not(:disabled) {
-  background: var(--bg-primary-hover, #1d4ed8);
+.walkthrough-arrow-prev {
+  background: #1e4d38;
+  color: #fff;
 }
 
-.wt-arrow:disabled {
-  opacity: 0.4;
+.walkthrough-arrow-prev:hover:not(:disabled) {
+  background: #26634a;
+  transform: scale(1.05);
+}
+
+.walkthrough-arrow-prev:disabled {
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
-.wt-arrow.done {
-  background: #10b981;
+.walkthrough-arrow-next {
+  background: #22c55e;
+  color: #fff;
 }
 
-.wt-arrow.loading {
-  opacity: 0.6;
+.walkthrough-arrow-next:hover:not(:disabled) {
+  background: #16a34a;
+  transform: scale(1.05);
+}
+
+.walkthrough-arrow-next.loading {
+  background: #78716c;
   cursor: wait;
+}
+
+.walkthrough-arrow-next.done {
+  background: #1e4d38;
+}
+
+.walkthrough-arrow-next:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+body.walkthrough-active .app-nav {
+  display: none !important;
+}
+
+body.walkthrough-active .status-strip {
+  display: none !important;
+}
+
+@keyframes walkthrough-pulse {
+  0%, 100% { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); }
+  50% { box-shadow: 0 4px 24px rgba(24, 60, 43, 0.5); }
 }

@@ -58,7 +58,6 @@ app = FastAPI(title="FieldAid", version="0.1.0", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 if WALKTHROUGH_MEDIA_DIR.exists():
-    shutil_app = True
     app.mount("/wt-media", StaticFiles(directory=str(WALKTHROUGH_MEDIA_DIR)), name="wt-media")
 
 
