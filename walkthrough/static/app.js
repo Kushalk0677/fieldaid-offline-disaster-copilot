@@ -1083,6 +1083,7 @@ const WT = {
 
     this.navigateAndPrefill();
     this.els.next.disabled = true;
+    this.els.next.classList.remove("done");
     this.els.next.classList.add("loading");
     this.els.next.textContent = "Running...";
 
@@ -1107,13 +1108,14 @@ const WT = {
         await this.apiClick("#exportSync");
         await this.wait(1500);
       } else if (step.button.includes("markSyncExported")) {
-        await this.apiClick("#markSyncExported");
+        await this.markSyncExportedQuietly();
         await this.wait(1500);
       }
 
       this.els.next.classList.remove("loading");
       this.els.next.classList.add("done");
       this.els.next.textContent = "\u2714 Done";
+      this.els.next.disabled = false;
     } catch (err) {
       this.els.next.classList.remove("loading");
       this.els.next.disabled = false;
@@ -1135,8 +1137,10 @@ const WT = {
       if (tab) tab.click();
     }
 
+    const analysisForm = step.tab ? document.querySelector(`#panel-${step.tab} .analysis-form`) : null;
+
     if (step.note) {
-      const textarea = document.querySelector(".analysis-form textarea");
+      const textarea = analysisForm?.querySelector('[name="note_text"]');
       if (textarea) {
         textarea.value = step.note;
         textarea.dispatchEvent(new Event("input", { bubbles: true }));
@@ -1144,7 +1148,7 @@ const WT = {
     }
 
     if (step.location) {
-      const locInput = document.querySelector(".analysis-form input[placeholder*='location' i], .analysis-form input[placeholder*='Location' i]");
+      const locInput = analysisForm?.querySelector('[name="location"]');
       if (locInput) {
         locInput.value = step.location;
         locInput.dispatchEvent(new Event("input", { bubbles: true }));
@@ -1152,7 +1156,7 @@ const WT = {
     }
 
     if (step.model) {
-      const modelSelect = document.querySelector(".analysis-form .field-model select, .analysis-form select");
+      const modelSelect = analysisForm?.querySelector('[name="model"]');
       if (modelSelect) {
         modelSelect.value = step.model;
         modelSelect.dispatchEvent(new Event("change", { bubbles: true }));
@@ -1184,12 +1188,12 @@ const WT = {
     }
 
     if (step.video_type && step.location) {
-      const vLoc = document.getElementById("videoLocation");
+      const vLoc = document.querySelector('#videoScanForm [name="location"]');
       if (vLoc) {
         vLoc.value = step.location;
         vLoc.dispatchEvent(new Event("input", { bubbles: true }));
       }
-      const vModel = document.getElementById("videoModel");
+      const vModel = document.querySelector('#videoScanForm [name="model"]');
       if (vModel) {
         vModel.value = step.model || "gemma4:e4b";
         vModel.dispatchEvent(new Event("change", { bubbles: true }));
@@ -1203,16 +1207,24 @@ const WT = {
   loadMedia(step) {
     if (!step.media) return;
 
-    const isVideo = step.video_type;
-    const formSelector = isVideo ? "#videoScanForm" : ".analysis-form";
-    const form = document.querySelector(formSelector);
-    if (!form) return;
+    let fileInput = null;
+    if (step.video_type) {
+      fileInput = document.querySelector('#videoScanForm input[type="file"]');
+    } else if (step.question) {
+      fileInput = document.querySelector('#groundingImage');
+    } else if (step.tab) {
+      fileInput = document.querySelector(`#panel-${step.tab} .analysis-form input[type="file"]`);
+    }
 
-    const fileInput = form.querySelector('input[type="file"]');
     if (!fileInput) return;
 
     fetch(`/wt-media/${step.media}`)
-      .then((r) => r.blob())
+      .then((r) => {
+        if (!r.ok) {
+          throw new Error(`Media ${step.media} failed to load (${r.status})`);
+        }
+        return r.blob();
+      })
       .then((blob) => {
         const file = new File([blob], step.media, { type: blob.type });
         const dt = new DataTransfer();
@@ -1234,7 +1246,7 @@ const WT = {
     fd.append("audience", "district emergency operations center");
 
     if (step.media && step.media.endsWith(".jpg")) {
-      const blob = await (await fetch(`/wt-media/${step.media}`)).blob();
+      const blob = await this.fetchMediaBlob(step.media);
       fd.append("image", new File([blob], step.media), step.media);
     }
 
@@ -1247,7 +1259,7 @@ const WT = {
   async submitVideo(step) {
     const fd = new FormData();
     if (step.media) {
-      const blob = await (await fetch(`/wt-media/${step.media}`)).blob();
+      const blob = await this.fetchMediaBlob(step.media);
       fd.append("video", new File([blob], step.media), step.media);
     }
     fd.append("location", step.location || "Unknown");
@@ -1267,7 +1279,7 @@ const WT = {
     fd.append("model", step.model || "gemma4:e4b");
 
     if (step.media) {
-      const blob = await (await fetch(`/wt-media/${step.media}`)).blob();
+      const blob = await this.fetchMediaBlob(step.media);
       fd.append("image", new File([blob], step.media), step.media);
     }
 
@@ -1310,13 +1322,40 @@ const WT = {
     await this.wait(500);
   },
 
+  async fetchMediaBlob(filename) {
+    const res = await fetch(`/wt-media/${filename}`);
+    if (!res.ok) {
+      throw new Error(`Media ${filename} failed to load (${res.status})`);
+    }
+    return res.blob();
+  },
+
+  async markSyncExportedQuietly() {
+    await fetch("/api/sync/mark-exported", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: null }),
+    });
+    await loadExportQueues();
+  },
+
   updateUI() {
     if (!this.steps.length) return;
+    if (this.current < 0) {
+      this.els.counter.textContent = `Ready / ${this.steps.length} steps`;
+      this.els.prev.disabled = true;
+      this.els.next.disabled = false;
+      this.els.next.classList.remove("loading", "done");
+      this.els.next.textContent = "Next \u25B6";
+      return;
+    }
     this.els.counter.textContent = `Step ${this.current + 1} / ${this.steps.length}: ${this.steps[this.current].title}`;
     this.els.prev.disabled = this.current <= 0;
 
     if (this.current >= this.steps.length - 1) {
       this.els.next.textContent = "Finish";
+    } else if (!this.els.next.classList.contains("done") && !this.els.next.classList.contains("loading")) {
+      this.els.next.textContent = "Next \u25B6";
     }
   },
 
@@ -1326,4 +1365,3 @@ const WT = {
 };
 
 WT.init();
-

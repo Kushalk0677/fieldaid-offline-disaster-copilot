@@ -169,7 +169,7 @@
                   <span class="file-hint">JPG, PNG, or phone screenshot</span>
                 </label>
                 <div class="local-preview hidden" data-file-preview></div>
-                <button class="primary" type="submit">Analyze Shelter</button>
+                <button class="primary" id="analyzeShelter" type="submit">Analyze Shelter</button>
               </form>
             </section>
 
@@ -212,7 +212,7 @@
                   <span class="file-hint">Road, bridge, shelter, supply list, or map photo</span>
                 </label>
                 <div class="local-preview hidden" data-file-preview></div>
-                <button class="primary" type="submit">Assess Damage</button>
+                <button class="primary" id="assessDamage" type="submit">Assess Damage</button>
               </form>
             </section>
           </section>
@@ -462,10 +462,10 @@
     <a href="#" id="walkthroughStart" class="walkthrough-start-btn">▶ Start Walkthrough</a>
 
     <!-- Walkthrough End Button -->
-    <button type="button" id="walkthroughEnd" class="walkthrough-end-btn">✕</button>
+    <button type="button" id="walkthroughEnd" class="walkthrough-end-btn hidden">✕</button>
 
     <!-- Walkthrough Navigation Bar -->
-    <div id="walkthroughNav" class="walkthrough-nav-bar">
+    <div id="walkthroughNav" class="walkthrough-nav-bar hidden">
       <button type="button" id="walkthroughPrev" class="walkthrough-arrow walkthrough-arrow-prev" disabled>◀</button>
       <div id="walkthroughCounter" class="walkthrough-counter">Step 0 / 11</div>
       <button type="button" id="walkthroughNext" class="walkthrough-arrow walkthrough-arrow-next">Next ▶</button>

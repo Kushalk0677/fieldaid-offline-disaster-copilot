@@ -45,6 +45,8 @@ STATIC_DIR = ROOT / "static"
 UPLOAD_DIR = ROOT / "data" / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 WALKTHROUGH_MEDIA_DIR = ROOT / "media"
+if not WALKTHROUGH_MEDIA_DIR.exists() and (ROOT / "walkthrough" / "media").exists():
+    WALKTHROUGH_MEDIA_DIR = ROOT / "walkthrough" / "media"
 
 
 @asynccontextmanager
@@ -57,8 +59,7 @@ async def lifespan(_: FastAPI):
 app = FastAPI(title="FieldAid", version="0.1.0", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
-if WALKTHROUGH_MEDIA_DIR.exists():
-    app.mount("/wt-media", StaticFiles(directory=str(WALKTHROUGH_MEDIA_DIR)), name="wt-media")
+app.mount("/wt-media", StaticFiles(directory=str(WALKTHROUGH_MEDIA_DIR)), name="wt-media")
 
 
 @app.get("/")
