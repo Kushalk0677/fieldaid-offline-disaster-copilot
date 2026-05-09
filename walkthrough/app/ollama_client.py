@@ -33,6 +33,8 @@ Location: {location}
 Responder note:
 {note_text or "[No text note provided. Use the image if present and be explicit about uncertainty.]"}
 
+If the responder note includes optional weather, satellite, Street View, map, or external URL context, treat it as supporting evidence only. Do not declare roads, bridges, buildings, or hazard zones safe from online context or imagery alone.
+
 Offline guidance excerpts:
 {guidance_context}
 

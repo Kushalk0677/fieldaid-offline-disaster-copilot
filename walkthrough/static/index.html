@@ -28,6 +28,11 @@
           <span>High priority</span>
           <strong id="highCount">0</strong>
         </div>
+        <div class="status-card connectivity-card">
+          <span>Connectivity</span>
+          <strong id="connectivityBadge" class="connectivity-badge">Offline Operational</strong>
+          <small>Low Connectivity / Deferred Sync</small>
+        </div>
       </div>
     </header>
 
@@ -200,6 +205,34 @@
                   Field note
                   <textarea name="note_text" rows="8">Photo from volunteer near market bridge. Road appears blocked after flooding. Need route safety assessment and alternate access for water delivery.</textarea>
                 </label>
+                <section class="context-card" aria-label="Optional online context">
+                  <div class="context-heading">
+                    <div>
+                      <strong>Optional Online Context</strong>
+                      <p>Use when connectivity exists. FieldAid still works without these fields.</p>
+                    </div>
+                    <span class="scenario-label">Enrichment</span>
+                  </div>
+                  <div class="form-grid">
+                    <label>
+                      Weather snapshot
+                      <input name="weather_context" placeholder="Example: heavy rain, 42 mm last 6h, wind 32 km/h">
+                    </label>
+                    <label>
+                      Map / Street View context
+                      <input name="map_context" placeholder="Example: only bridge access to Ward 7 market route">
+                    </label>
+                  </div>
+                  <label>
+                    Satellite / before-assessment context
+                    <textarea name="satellite_context" rows="3" placeholder="Example: pre-event imagery showed two-lane paved road; current image shows overtopping and shoulder erosion."></textarea>
+                  </label>
+                  <label>
+                    External context URL
+                    <input name="external_context_url" placeholder="Optional map, weather, Street View, or satellite source URL">
+                  </label>
+                  <p class="inline-note">Online sources are supporting context only. FieldAid does not require them and never declares routes or structures safe from imagery.</p>
+                </section>
                 <label class="file-row">
                   <span>Before image</span>
                   <input name="before_image" type="file" accept="image/*">
@@ -467,7 +500,7 @@
     <!-- Walkthrough Navigation Bar -->
     <div id="walkthroughNav" class="walkthrough-nav-bar hidden">
       <button type="button" id="walkthroughPrev" class="walkthrough-arrow walkthrough-arrow-prev" disabled>◀</button>
-      <div id="walkthroughCounter" class="walkthrough-counter">Step 0 / 11</div>
+      <div id="walkthroughCounter" class="walkthrough-counter">Step 0 / 12</div>
       <button type="button" id="walkthroughNext" class="walkthrough-arrow walkthrough-arrow-next">Next ▶</button>
     </div>
 

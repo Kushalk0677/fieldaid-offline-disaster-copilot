@@ -97,6 +97,31 @@ h3 {
   color: var(--blue);
 }
 
+.connectivity-card {
+  min-width: 156px;
+}
+
+.connectivity-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #e7f6ee;
+  color: var(--green);
+  border: 1px solid #b9ddca;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.connectivity-card small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
 .app-page {
   display: none;
   padding: 24px clamp(18px, 4vw, 44px);
@@ -435,6 +460,35 @@ button:disabled {
 .analysis-form {
   display: grid;
   gap: 15px;
+}
+
+.context-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #cfe5d7;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f7fbf8 0%, #eef7f2 100%);
+}
+
+.context-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.context-heading strong {
+  display: block;
+  color: var(--green);
+  font-size: 14px;
+}
+
+.context-heading p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .form-grid {

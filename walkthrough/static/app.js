@@ -1163,6 +1163,15 @@ const WT = {
       }
     }
 
+    ["weather_context", "map_context", "satellite_context", "external_context_url"].forEach((name) => {
+      if (!step[name]) return;
+      const field = analysisForm?.querySelector(`[name="${name}"]`);
+      if (field) {
+        field.value = step[name];
+        field.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    });
+
     if (step.sms_language) {
       const langSelect = document.getElementById("languageSelect");
       if (langSelect) {
@@ -1244,6 +1253,10 @@ const WT = {
     fd.append("sms_language", step.sms_language || "English");
     fd.append("role", step.role || "district operations");
     fd.append("audience", "district emergency operations center");
+    fd.append("weather_context", step.weather_context || "");
+    fd.append("map_context", step.map_context || "");
+    fd.append("satellite_context", step.satellite_context || "");
+    fd.append("external_context_url", step.external_context_url || "");
 
     if (step.media && step.media.endsWith(".jpg")) {
       const blob = await this.fetchMediaBlob(step.media);

@@ -72,15 +72,16 @@ def walkthrough_steps():
     return [
         {"id": 1, "title": "Shelter Intake", "page": "intake", "tab": "shelter", "note": "43 people in the school building. 6 elderly residents, 2 insulin patients need refrigeration. Water left for about 8 hours. Bridge to main road is blocked.", "location": "Government School, Sector 7", "model": "gemma4:e4b", "media": None, "button": "#analyzeShelter", "question": None, "video_type": None, "sms_language": "English", "role": "district operations"},
         {"id": 2, "title": "Flood Damage Assessment", "page": "intake", "tab": "damage", "note": "Creek road bridge completely down. Vehicles cannot pass. Alternative route through Hilltown but road washed out at two points.", "location": "Creek Road Bridge, Sector 7", "model": "gemma4:e4b", "media": "flooded_highway.jpg", "button": "#assessDamage", "question": None, "video_type": None, "sms_language": "English", "role": "district operations"},
-        {"id": 3, "title": "Fire Video Scan", "page": "video", "tab": None, "note": None, "location": "Sector 7 wildfire area", "model": "gemma4:e4b", "media": "wildfire.mp4", "button": "#runVideoScan", "question": None, "video_type": "mp4", "sms_language": "English", "role": "district operations"},
-        {"id": 4, "title": "Hurricane Video Scan", "page": "video", "tab": None, "note": None, "location": "Coastal route affected by hurricane", "model": "gemma4:e4b", "media": "hurricane.mp4", "button": "#runVideoScan", "question": None, "video_type": "mp4", "sms_language": "English", "role": "district operations"},
-        {"id": 5, "title": "Trust Gate: Is fire area safe?", "page": "trust", "tab": None, "note": None, "location": None, "model": "gemma4:e4b", "media": "wildfire_near_road.jpg", "button": "#groundingButton", "question": "Is this area safe for civilian access near the fire?", "video_type": None, "sms_language": "English", "role": None},
-        {"id": 6, "title": "Trust Gate: Can we cross the flooded highway?", "page": "trust", "tab": None, "note": None, "location": None, "model": "gemma4:e4b", "media": "flooded_highway.jpg", "button": "#groundingButton", "question": "Can civilians safely cross this flooded highway?", "video_type": None, "sms_language": "English", "role": None},
-        {"id": 7, "title": "Earthquake Video Scan", "page": "video", "tab": None, "note": None, "location": "Earthquake affected zone", "model": "gemma4:e4b", "media": "earthquake.mp4", "button": "#runVideoScan", "question": None, "video_type": "mp4", "sms_language": "English", "role": "district operations"},
-        {"id": 8, "title": "Operations Dashboard", "page": "dashboard", "tab": None, "note": None, "location": None, "model": "gemma4:e4b", "media": None, "button": "#refreshDashboard", "question": None, "video_type": None, "sms_language": "English", "role": None},
-        {"id": 9, "title": "Incident Log", "page": "incidents", "tab": None, "note": None, "location": None, "model": "gemma4:e4b", "media": None, "button": "#refreshLog", "question": None, "video_type": None, "sms_language": "English", "role": None},
-        {"id": 10, "title": "Discord Handoff Draft", "page": "exports", "tab": None, "note": None, "location": None, "model": "gemma4:e4b", "media": None, "button": "#exportSync", "question": None, "video_type": None, "sms_language": "English", "role": None},
-        {"id": 11, "title": "Offline Sync Export", "page": "exports", "tab": None, "note": None, "location": None, "model": "gemma4:e4b", "media": None, "button": "#markSyncExported", "question": None, "video_type": None, "sms_language": "English", "role": None},
+        {"id": 3, "title": "Online Context Enrichment", "page": "intake", "tab": "damage", "note": "Creek road bridge completely down. Vehicles cannot pass. Alternative route through Hilltown but road washed out at two points.", "location": "Creek Road Bridge, Sector 7", "model": "gemma4:e4b", "media": "flooded_highway.jpg", "button": "#assessDamage", "question": None, "video_type": None, "sms_language": "English", "role": "district operations", "weather_context": "Rain gauge reports 42 mm in the last 6 hours; river stage rising; wind 32 km/h.", "map_context": "Only paved access from the school shelter to the market route crosses Creek Road Bridge; alternate Hilltown route adds 18 km and has two low-water crossings.", "satellite_context": "Pre-event satellite and Street View context showed a two-lane paved bridge approach; current field image shows overtopping, shoulder erosion, and blocked vehicle access.", "external_context_url": "https://maps.example.local/creek-road-bridge"},
+        {"id": 4, "title": "Fire Video Scan", "page": "video", "tab": None, "note": None, "location": "Sector 7 wildfire area", "model": "gemma4:e4b", "media": "wildfire.mp4", "button": "#runVideoScan", "question": None, "video_type": "mp4", "sms_language": "English", "role": "district operations"},
+        {"id": 5, "title": "Hurricane Video Scan", "page": "video", "tab": None, "note": None, "location": "Coastal route affected by hurricane", "model": "gemma4:e4b", "media": "hurricane.mp4", "button": "#runVideoScan", "question": None, "video_type": "mp4", "sms_language": "English", "role": "district operations"},
+        {"id": 6, "title": "Trust Gate: Is fire area safe?", "page": "trust", "tab": None, "note": None, "location": None, "model": "gemma4:e4b", "media": "wildfire_near_road.jpg", "button": "#groundingButton", "question": "Is this area safe for civilian access near the fire?", "video_type": None, "sms_language": "English", "role": None},
+        {"id": 7, "title": "Trust Gate: Can we cross the flooded highway?", "page": "trust", "tab": None, "note": None, "location": None, "model": "gemma4:e4b", "media": "flooded_highway.jpg", "button": "#groundingButton", "question": "Can civilians safely cross this flooded highway?", "video_type": None, "sms_language": "English", "role": None},
+        {"id": 8, "title": "Earthquake Video Scan", "page": "video", "tab": None, "note": None, "location": "Earthquake affected zone", "model": "gemma4:e4b", "media": "earthquake.mp4", "button": "#runVideoScan", "question": None, "video_type": "mp4", "sms_language": "English", "role": "district operations"},
+        {"id": 9, "title": "Operations Dashboard", "page": "dashboard", "tab": None, "note": None, "location": None, "model": "gemma4:e4b", "media": None, "button": "#refreshDashboard", "question": None, "video_type": None, "sms_language": "English", "role": None},
+        {"id": 10, "title": "Incident Log", "page": "incidents", "tab": None, "note": None, "location": None, "model": "gemma4:e4b", "media": None, "button": "#refreshLog", "question": None, "video_type": None, "sms_language": "English", "role": None},
+        {"id": 11, "title": "Discord Handoff Draft", "page": "exports", "tab": None, "note": None, "location": None, "model": "gemma4:e4b", "media": None, "button": "#exportSync", "question": None, "video_type": None, "sms_language": "English", "role": None},
+        {"id": 12, "title": "Offline Sync Export", "page": "exports", "tab": None, "note": None, "location": None, "model": "gemma4:e4b", "media": None, "button": "#markSyncExported", "question": None, "video_type": None, "sms_language": "English", "role": None},
     ]
 
 
@@ -92,6 +93,26 @@ def walkthrough_media(filename: str):
     return FileResponse(media_path)
 
 
+def _append_optional_context(
+    note_text: str,
+    weather_context: str,
+    map_context: str,
+    satellite_context: str,
+    external_context_url: str,
+) -> str:
+    context_items = [
+        ("Weather snapshot", weather_context),
+        ("Map / Street View context", map_context),
+        ("Satellite / before-assessment context", satellite_context),
+        ("External context URL", external_context_url),
+    ]
+    context_lines = [f"- {label}: {value.strip()}" for label, value in context_items if value.strip()]
+    if not context_lines:
+        return note_text
+    context_block = "\n\nOptional online context (supporting evidence only; verify before action):\n" + "\n".join(context_lines)
+    return f"{note_text}{context_block}".strip()
+
+
 @app.post("/api/analyze", response_model=AnalysisResult)
 async def analyze(
     scenario_type: ScenarioType = Form(...),
@@ -101,16 +122,21 @@ async def analyze(
     model: str = Form("gemma4:e4b"),
     role: str = Form("district operations"),
     sms_language: str = Form("English"),
+    weather_context: str = Form(""),
+    map_context: str = Form(""),
+    satellite_context: str = Form(""),
+    external_context_url: str = Form(""),
     image: UploadFile | None = File(None),
     before_image: UploadFile | None = File(None),
 ) -> AnalysisResult:
     image_info, image_path = await _save_upload(image) if image and image.filename else (None, None)
     before_image_info, before_image_path = await _save_upload(before_image) if before_image and before_image.filename else (None, None)
+    enriched_note = _append_optional_context(note_text, weather_context, map_context, satellite_context, external_context_url)
     query = " ".join(
         [
             scenario_type,
             location,
-            note_text,
+            enriched_note,
             image_info.filename if image_info else "",
             before_image_info.filename if before_image_info else "",
         ]
@@ -120,7 +146,7 @@ async def analyze(
     try:
         raw = await call_gemma4(
             scenario_type=scenario_type,
-            note_text=note_text,
+            note_text=enriched_note,
             location=location,
             guidance_context=guidance_context,
             model=model,
@@ -129,7 +155,7 @@ async def analyze(
         )
         result = coerce_model_result(raw, scenario_type, location, audience, citations, model, image_info, before_image_info, role, sms_language)
     except Exception:
-        result = fallback_analysis(scenario_type, note_text, location, audience, citations, model, image_info, before_image_info, role, sms_language)
+        result = fallback_analysis(scenario_type, enriched_note, location, audience, citations, model, image_info, before_image_info, role, sms_language)
     return save_incident(result)
 
 
