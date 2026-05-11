@@ -712,7 +712,7 @@ async function loadOfflineProof() {
     <article class="proof-card">
       <span>Gemma Runtime</span>
       <strong>Ollama local</strong>
-      <p>Default: gemma4:e4b. Optional: fieldaid-gemma4:e4b and gemma4:26b.</p>
+      <p>Default: gemma4:e4b. Optional: gemma4:2b, fieldaid-gemma4:e4b, and gemma4:26b.</p>
     </article>
     <article class="proof-card">
       <span>Visual Model</span>
