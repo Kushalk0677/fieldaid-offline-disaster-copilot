@@ -117,6 +117,7 @@ ollama run gemma4:e4b "Summarize this shelter note: 43 people, insulin patients,
 FieldAid model selector values:
 
 ```text
+gemma4:2b
 gemma4:e4b
 gemma4:26b
 fieldaid-gemma4:e4b
